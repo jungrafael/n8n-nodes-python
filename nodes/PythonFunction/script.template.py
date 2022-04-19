@@ -3,15 +3,15 @@ import json
 import sys
 
 
-def snippet_runner(items: list, env_vars: dict) -> list:
+def snippet_runner(env_vars: dict) -> list:
 	# ...code snippet
 	# should return items
 	# <%- codeSnippet %>
 	pass
 
 
-def main(items: list, env_vars: dict = {}) -> None:
-	new_items = snippet_runner(items, env_vars)
+def main(env_vars: dict = {}) -> None:
+	new_items = snippet_runner(env_vars)
 	assert type(new_items) is list or isinstance(new_items, list), "code snippet should return a list"
 	# print('```', json.dumps(new_items), '```')
 	# sys.stdout.write(json.dumps(new_items))

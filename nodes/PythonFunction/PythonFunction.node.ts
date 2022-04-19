@@ -75,7 +75,7 @@ return items
 		const pythonEnvVars: Record<string, string> = parseEnvFile(String((await this.getCredentials('pythonEnvVars'))?.envFileContent || ''));
 		let scriptPath = '';
 		try {
-			scriptPath = await getTemporaryScriptPath(functionCode);
+			scriptPath = await getTemporaryScriptPath(functionCode, unwrapJsonField(items));
 		} catch (error) {
 			throw new NodeOperationError(this.getNode(), `Could not generate temporary python script file: ${error.message}`);
 		}
@@ -84,7 +84,7 @@ return items
 		try {
 
 			// Execute the function code
-			const execResults = await execPythonSpawn(scriptPath, unwrapJsonField(items), pythonEnvVars, this.sendMessageToUI);
+			const execResults = await execPythonSpawn(scriptPath, pythonEnvVars, this.sendMessageToUI);
 			const {
 				error: returnedError,
 				exitCode,
@@ -153,7 +153,7 @@ function parseShellOutput(outputStr: string): [] {
 }
 
 
-function execPythonSpawn(scriptPath: string, items: IDataObject[], envVars: object, stdoutListener?: CallableFunction): Promise<IExecReturnData> {
+function execPythonSpawn(scriptPath: string, envVars: object, stdoutListener?: CallableFunction): Promise<IExecReturnData> {
 	const returnData: IExecReturnData = {
 		error: undefined,
 		exitCode: 0,
@@ -161,7 +161,7 @@ function execPythonSpawn(scriptPath: string, items: IDataObject[], envVars: obje
 		stdout: '',
 	};
 	return new Promise((resolve, reject) => {
-		const child = spawn('python3', [scriptPath, '--items', JSON.stringify(items), '--env_vars', JSON.stringify(envVars)], {
+		const child = spawn('python3', [scriptPath, '--env_vars', JSON.stringify(envVars)], {
 			cwd: process.cwd(),
 			// shell: true,
 		});
@@ -221,15 +221,16 @@ function formatCodeSnippet(code: string): string {
 }
 
 
-function getScriptCode(codeSnippet: string): string {
+function getScriptCode(codeSnippet: string, items: IDataObject[]): string {
 	const css = fs.readFileSync(path.resolve(__dirname, 'script.template.py'), 'utf8') || '';
+	codeSnippet = [`items = json.loads('${JSON.stringify(items)}')`, codeSnippet].join("\n");
 	return css.replace('pass', formatCodeSnippet(codeSnippet));
 }
 
 
-async function getTemporaryScriptPath(codeSnippet: string): Promise<string> {
+async function getTemporaryScriptPath(codeSnippet: string, items: IDataObject[]): Promise<string> {
 	const tmpPath = tempy.file({extension: 'py'});
-	const codeStr = getScriptCode(codeSnippet);
+	const codeStr = getScriptCode(codeSnippet, items);
 	// write code to file
 	fs.writeFileSync(tmpPath, codeStr);
 	return tmpPath;
