@@ -58,7 +58,7 @@ export class PythonFunction implements INodeType {
 return items
 `,
 				description: 'The Python code to execute.',
-				noDataExpression: true,
+				noDataExpression: false,
 			},
 		],
 	};

@@ -1,7 +1,7 @@
+# -*- coding: utf-8 -*-
 import fire
 import json
 import sys
-
 
 def snippet_runner(env_vars: dict) -> list:
 	# ...code snippet
