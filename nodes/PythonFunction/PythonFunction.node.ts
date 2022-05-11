@@ -223,7 +223,7 @@ function formatCodeSnippet(code: string): string {
 
 function getScriptCode(codeSnippet: string, items: IDataObject[]): string {
 	const css = fs.readFileSync(path.resolve(__dirname, 'script.template.py'), 'utf8') || '';
-	codeSnippet = [`items = json.loads('${JSON.stringify(items)}')`, codeSnippet].join("\n");
+	codeSnippet = [`items = json.loads(r'${JSON.stringify(items)}')`, codeSnippet].join("\n");
 	return css.replace('pass', formatCodeSnippet(codeSnippet));
 }
 
